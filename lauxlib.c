@@ -121,7 +121,9 @@ static int lastlevel (lua_State *L) {
   return le - 1;
 }
 
-
+/* 
+Creates and pushes a traceback of the stack L1. If msg is not NULL it is appended at the beginning of the traceback. 
+The level parameter tells at which level to start the traceback.*/
 LUALIB_API void luaL_traceback (lua_State *L, lua_State *L1,
                                 const char *msg, int level) {
   lua_Debug ar;
@@ -565,7 +567,7 @@ LUALIB_API void luaL_addvalue (luaL_Buffer *B) {
   lua_remove(L, (buffonstack(B)) ? -2 : -1);  /* remove value */
 }
 
-
+//Initializes a buffer B. This function does not allocate any space; the buffer must be declared as a variable
 LUALIB_API void luaL_buffinit (lua_State *L, luaL_Buffer *B) {
   B->L = L;
   B->b = B->initb;
@@ -699,7 +701,12 @@ static int skipcomment (LoadF *lf, int *cp) {
   else return 0;  /* no comment */
 }
 
-
+/*
+Loads a file as a Lua chunk. This function uses lua_load to load the chunk in the file named filename. If filename is NULL, then it loads from the standard input. The first line in the file is ignored if it starts with a #.
+The string mode works as in function lua_load.
+This function returns the same results as lua_load, but it has an extra error code LUA_ERRFILE for file-related errors (e.g., it cannot open or read the file).
+As lua_load, this function only loads the chunk; it does not run it. 
+ */
 LUALIB_API int luaL_loadfilex (lua_State *L, const char *filename,
                                              const char *mode) {
   LoadF lf;
@@ -987,7 +994,8 @@ LUALIB_API void luaL_requiref (lua_State *L, const char *modname,
   }
 }
 
-
+//将字符串 s 生成一个副本， 并将其中的所有字符串 p 都替换为字符串 r 。 将结果串压栈并返回它
+//Creates a copy of string s by replacing any occurrence of the string p with the string r. Pushes the resulting string on the stack and returns it.
 LUALIB_API const char *luaL_gsub (lua_State *L, const char *s, const char *p,
                                                                const char *r) {
   const char *wild;
@@ -1022,7 +1030,11 @@ static int panic (lua_State *L) {
   return 0;  /* return to Lua to abort */
 }
 
-
+/*
+Creates a new Lua state. It calls lua_newstate with an allocator based on the standard C realloc function and then sets a panic function (see §4.6)
+ that prints an error message to the standard error output in case of fatal errors.
+Returns the new state, or NULL if there is a memory allocation error.
+ */
 LUALIB_API lua_State *luaL_newstate (void) {
   lua_State *L = lua_newstate(l_alloc, NULL);
   if (L) lua_atpanic(L, &panic);
